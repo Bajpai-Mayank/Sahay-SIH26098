@@ -32,7 +32,10 @@ class KimiK3Provider(AIProvider):
         base_url: Optional[str] = None,
         model_name: Optional[str] = None,
     ):
-        self.api_key = api_key or settings.NVIDIA_API_KEY or os.getenv("NVIDIA_API_KEY")
+        raw_key = api_key or settings.NVIDIA_API_KEY or os.getenv("NVIDIA_API_KEY")
+        if raw_key and raw_key.strip().startswith("Bearer "):
+            raw_key = raw_key.strip()[7:].strip()
+        self.api_key = raw_key
         self.base_url = (
             base_url
             or settings.NVIDIA_NIM_BASE_URL
