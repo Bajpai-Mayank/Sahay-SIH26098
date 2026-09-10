@@ -6,6 +6,9 @@
 !.env.example
 *.pem
 *.key
+*.db
+*.sqlite
+*.sqlite3
 
 # Python
 __pycache__/
@@ -34,6 +37,7 @@ wheels/
 .coverage
 htmlcov/
 venv/
+.venv/
 ENV/
 
 # Flutter / Dart
