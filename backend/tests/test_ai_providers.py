@@ -34,3 +34,22 @@ async def test_gemini_fallback_when_unconfigured():
     assert "provider_fallback" in res
     assert "mock" in res["provider_fallback"]
     assert len(res["content"]) > 0
+
+
+@pytest.mark.asyncio
+async def test_kimi_provider_fallback_when_unconfigured():
+    from app.ai.providers.kimi import KimiK3Provider
+    provider = KimiK3Provider(api_key=None)
+    assert provider.is_configured() is False
+
+    health = await provider.health_check()
+    assert health["status"] == "unconfigured"
+
+    # Async generation falls back to mock
+    res = await provider.generate_response([{"role": "user", "content": "Checking in"}])
+    assert "provider_fallback" in res
+    assert "mock" in res["provider_fallback"]
+
+    # Sync chat falls back safely
+    sync_reply = provider.chat("Hello")
+    assert len(sync_reply) > 0

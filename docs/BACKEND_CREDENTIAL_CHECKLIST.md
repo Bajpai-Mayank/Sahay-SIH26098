@@ -20,12 +20,14 @@ cp .env.example .env
 ## 2. Service Credentials Checklist
 
 ### A. Database (Supabase PostgreSQL / Self-Hosted PostgreSQL)
-- [ ] Log in to [Supabase](https://supabase.com/) and create a project.
-- [ ] Navigate to **Project Settings** → **Database** → **Connection string**.
-- [ ] Choose **URI** and select **Transaction Pooler (Port 6543)** (or Session pooler 5432).
-- [ ] Set `DATABASE_URL` in `backend/.env`:
+Your Supabase host: `db.ooqaehsxxmzkwgizwwwc.supabase.co`
+- [ ] Set `DATABASE_URL` in `backend/.env` using your Supabase database password:
   ```env
-  DATABASE_URL=postgresql+asyncpg://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
+  # Direct connection (Port 5432):
+  DATABASE_URL=postgresql+asyncpg://postgres:[YOUR_PASSWORD]@db.ooqaehsxxmzkwgizwwwc.supabase.co:5432/postgres
+
+  # Or Supabase Transaction Pooler (Port 6543 - recommended if direct connection is blocked by IPv6):
+  # DATABASE_URL=postgresql+asyncpg://postgres.ooqaehsxxmzkwgizwwwc:[YOUR_PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
   ```
   *(Note: `asyncpg` prepared statement cache is already configured to 0 in `app/db/session.py` to support PgBouncer transaction mode).*
 - [ ] **Verification**:
@@ -37,19 +39,19 @@ cp .env.example .env
 ---
 
 ### B. Supabase Auth & Storage (Optional)
-- [ ] Navigate to **Project Settings** → **API**.
-- [ ] Copy **Project URL** and paste into `SUPABASE_URL`:
+- [ ] Your Supabase Project URL:
   ```env
-  SUPABASE_URL=https://[YOUR_PROJECT_ID].supabase.co
+  SUPABASE_URL=https://ooqaehsxxmzkwgizwwwc.supabase.co
   ```
-- [ ] Copy **anon public** key and paste into `SUPABASE_PUBLISHABLE_KEY`:
-  ```env
-  SUPABASE_PUBLISHABLE_KEY=eyJhbGciOi...
-  ```
-- [ ] Copy **service_role** secret and paste into `SUPABASE_SECRET_KEY`:
-  ```env
-  SUPABASE_SECRET_KEY=eyJhbGciOi...
-  ```
+- [ ] From Supabase Dashboard → **Project Settings** → **API**:
+  - Copy **anon public** key and paste into `SUPABASE_PUBLISHABLE_KEY`:
+    ```env
+    SUPABASE_PUBLISHABLE_KEY=eyJhbGciOi...
+    ```
+  - Copy **service_role** secret and paste into `SUPABASE_SECRET_KEY`:
+    ```env
+    SUPABASE_SECRET_KEY=eyJhbGciOi...
+    ```
 - [ ] If using Supabase Storage for audio recordings, set:
   ```env
   STORAGE_BACKEND=supabase
@@ -61,7 +63,19 @@ cp .env.example .env
 
 ### C. AI Providers
 
-#### Option 1: Google Gemini (Recommended Cloud LLM)
+#### Option 1: Kimi K3 via NVIDIA NIM (High Performance & Reasoning)
+- [ ] Obtain an API key from [NVIDIA Build / NIM](https://build.nvidia.com/).
+- [ ] Set in `backend/.env`:
+  ```env
+  AI_PROVIDER=kimi
+  NVIDIA_API_KEY=nvapi-...
+  NVIDIA_NIM_BASE_URL=https://integrate.api.nvidia.com/v1
+  KIMI_K3_MODEL=moonshotai/kimi-k3
+  ```
+- [ ] Features full async FastAPI endpoint support + synchronous `provider.chat(msg)` method with automatic safety boundary validation.
+- [ ] Leave `AI_FALLBACK_TO_MOCK=true` so that if API quotas are exceeded, the system automatically falls back to deterministic mock logic without failing requests.
+
+#### Option 2: Google Gemini (Recommended Cloud LLM)
 - [ ] Obtain an API key from [Google AI Studio](https://aistudio.google.com/).
 - [ ] Set in `backend/.env`:
   ```env
@@ -72,7 +86,7 @@ cp .env.example .env
 - [ ] Leave `AI_FALLBACK_TO_MOCK=true` so that if API quotas are exceeded, the system automatically falls back to deterministic mock logic without failing requests.
 - [ ] **Verification**: Run `GET /health/dependencies` or `GET /api/v1/health` after starting the server.
 
-#### Option 2: Ollama (Local LLM — 100% Private, Zero Cloud Cost)
+#### Option 3: Ollama (Local LLM — 100% Private, Zero Cloud Cost)
 - [ ] Install [Ollama](https://ollama.com/) locally and run `ollama run llama3`.
 - [ ] Set in `backend/.env`:
   ```env
@@ -80,7 +94,7 @@ cp .env.example .env
   OLLAMA_BASE_URL=http://localhost:11434
   ```
 
-#### Option 3: Hugging Face Inference API
+#### Option 4: Hugging Face Inference API
 - [ ] Generate an Access Token at [Hugging Face Settings](https://huggingface.co/settings/tokens).
 - [ ] Set in `backend/.env`:
   ```env
@@ -88,11 +102,12 @@ cp .env.example .env
   HF_TOKEN=hf_...
   ```
 
-#### Option 4: Mock Provider (Default)
+#### Option 5: Mock Provider (Default)
 - [ ] Set in `backend/.env`:
   ```env
   AI_PROVIDER=mock
   ```
+  Requires zero API keys and runs completely offline.
   Requires zero API keys and runs completely offline.
 
 ---

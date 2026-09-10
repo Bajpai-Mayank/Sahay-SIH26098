@@ -53,6 +53,11 @@ class Settings(BaseSettings):
     # HUGGING FACE
     HF_TOKEN: Optional[str] = None
 
+    # NVIDIA NIM / KIMI K3
+    NVIDIA_API_KEY: Optional[str] = None
+    NVIDIA_NIM_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
+    KIMI_K3_MODEL: str = "moonshotai/kimi-k3"
+
     # STORAGE
     STORAGE_BACKEND: str = "local"  # local | supabase
     STORAGE_PATH: str = "./storage_data"
